@@ -20,11 +20,10 @@ class PartialCube extends THREE.Group {
         this.tiles = new Array();
         var geometry, material, mesh;
         geometry = new THREE.PlaneGeometry(1,1);
-        material = new THREE.MeshBasicMaterial({color : 0xffffff});
 
         if(sides.pos_y)
         {
-            mesh = new THREE.Mesh(geometry, material);
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
             mesh.rotateX(Math.radians(-90));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0.5, 0));
             this.tiles.push({mesh : mesh, side : '+y'});
@@ -32,7 +31,7 @@ class PartialCube extends THREE.Group {
         }
         if(sides.pos_x)
         {
-            mesh = new THREE.Mesh(geometry, material);
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
             mesh.rotateY(Math.radians(90));
             mesh.position.addVectors(position, new THREE.Vector3(0.5, 0, 0));
             this.tiles.push({mesh : mesh, side : '+x'});
@@ -40,14 +39,14 @@ class PartialCube extends THREE.Group {
         }
         if(sides.pos_z)
         {
-            mesh = new THREE.Mesh(geometry, material);
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0, 0.5));
             this.tiles.push({mesh : mesh, side : '+z'});
             this.add(mesh);        
         }
         if(sides.neg_y)
         {
-            mesh = new THREE.Mesh(geometry, material);
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
             mesh.rotateX(Math.radians(90));
             mesh.position.addVectors(position, new THREE.Vector3(0, -0.5, 0));
             this.tiles.push({mesh : mesh, side : '-y'});
@@ -55,7 +54,7 @@ class PartialCube extends THREE.Group {
         }
         if(sides.neg_x)
         {
-            mesh = new THREE.Mesh(geometry, material);
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
             mesh.rotateY(Math.radians(-90));
             mesh.position.addVectors(position, new THREE.Vector3(-0.5, 0, 0));
             this.tiles.push({mesh : mesh, side : '-x'});
@@ -63,7 +62,7 @@ class PartialCube extends THREE.Group {
         }
         if(sides.neg_z)
         {
-            mesh = new THREE.Mesh(geometry, material);
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
             mesh.rotateY(Math.radians(180));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0, -0.5));
             this.tiles.push({mesh : mesh, side : '-z'});
@@ -253,6 +252,11 @@ var debug = false;
 var scene, camera, renderer, cameraControls;
 var RubiksCube;
 
+var raycaster = new THREE.Raycaster();
+var selection;
+
+var mouse = new THREE.Vector2();
+
 function init()
 {
     scene = new THREE.Scene();
@@ -271,7 +275,11 @@ function init()
     scene.add(RubiksCube);
 
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener( 'mousemove', onMouseMove, false );
+    window.addEventListener( 'mouseup', onMouseUp, false)
 }
+
+
 
 function initControls()
 {
@@ -291,6 +299,39 @@ function animate()
     cameraControls.update();
     RubiksCube.rotateMiddleAboutY(Math.radians(1));
     renderer.render(scene, camera);
+}
+
+function onMouseMove( event ) {
+
+	// calculate mouse position in normalized device coordinates
+	// (-1 to +1) for both components
+
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    
+    // update the picking ray with the camera and mouse position
+	raycaster.setFromCamera( mouse, camera );
+
+	// calculate objects intersecting the picking ray
+	var intersects = raycaster.intersectObject( RubiksCube, true );
+
+	if ( intersects.length > 0 ) {
+        selection = intersects[0].object;
+    }
+    else
+    {
+        selection = null;
+    }
+
+}
+
+function onMouseUp()
+{
+    if(selection)
+    {
+        selection.material.color.set(0xff0000);
+        console.log(selection);
+    }
 }
 
 function onWindowResize()
