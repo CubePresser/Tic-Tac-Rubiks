@@ -1,0 +1,24 @@
+{
+  "name": "tic-tac-rubix",
+  "version": "0.1.0",
+  "description": "Tic Tac Toe on a Rubix Cube",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonesjonathan/Tic-Tac-Rubix.git"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "CubePresser (JonesJonathan)",
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/jonesjonathan/Tic-Tac-Rubix/issues"
+  },
+  "homepage": "https://jonesjonathan.github.io/Tic-Tac-Rubix"
+}

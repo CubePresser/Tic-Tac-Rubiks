@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <!--Fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+    <link rel="stylesheet" href="style/style.css">
+
+    <!--Attempt to obtain js libraries through CDNs-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/98/three.min.js"></script>
+
+    <!--Fall back to this site's copies if a CDN is down-->
+    <script> if (!window.THREE) document.write('<script src="src/libs/three.min.js"><\/script>'); </script>
+
+    <title>Tic Tac Rubiks - Jonathan Jones</title>
+
+    <style>
+		body { margin: 0; }
+		canvas { width: 100%; height: 100% }
+	</style>
+</head>
+<body>
+    <script src="src/tools/WEBGLTest.js"></script>
+    <script src="src/tools/OrbitControls.js"></script>
+    <script src="src/index.js"></script>
+</body>
+</html>
