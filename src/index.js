@@ -16,9 +16,6 @@ Math.degrees = function(radians) {
 class PartialCube extends THREE.Group {
     constructor(position, sides)
     {
-        var defaultTex = new THREE.TextureLoader().load('src/textures/default.png');
-        defaultTex.name = "default";
-
         super();
         this.tiles = new Array();
         var geometry, material, mesh;
@@ -253,7 +250,7 @@ var debug = false;
 
 //Three variables
 var scene, camera, renderer, cameraControls;
-var Xtex, Otex;
+var Xtex, Otex, defaultTex;
 var RubiksCube;
 
 var raycaster = new THREE.Raycaster();
@@ -276,14 +273,26 @@ function init()
     document.body.appendChild(renderer.domElement);
 
     let loader = new THREE.TextureLoader();
-    Xtex = loader.load('src/textures/X.png');
-    Otex = loader.load('src/textures/O.png');
+    var texLoadCount = 0;
+    Xtex        = loader.load('src/textures/X.png', onLoad);
+    Otex        = loader.load('src/textures/O.png', onLoad);
+    defaultTex  = loader.load('src/textures/default.png', onLoad);
+    defaultTex.name = "default";
+
+    //Waits for all textures to load
+    function onLoad()
+    {
+        if(++texLoadCount != 3)
+            return;
+            
+        RubiksCube = new Rubiks();
+        scene.add(RubiksCube);
+
+        animate();
+    }
 
     initControls();
     camera.position.set( 0, 0, 5 );
-
-    RubiksCube = new Rubiks();
-    scene.add(RubiksCube);
 
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener( 'mousemove', onMouseMove, false );
@@ -372,4 +381,3 @@ function onWindowResize()
 }
 
 init();
-animate();
