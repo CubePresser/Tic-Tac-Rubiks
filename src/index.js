@@ -276,7 +276,7 @@ function init()
     var texLoadCount = 0;
     Xtex        = loader.load('src/textures/X.png', onLoad);
     Otex        = loader.load('src/textures/O.png', onLoad);
-    defaultTex  = loader.load('src/textures/default.png', onLoad);
+    defaultTex  = loader.load('src/textures/Default.png', onLoad);
     defaultTex.name = "default";
 
     initControls();
@@ -313,7 +313,6 @@ function initControls()
     cameraControls.rotateSpeed = 0.05;
 }
 
-var rot = 0;
 function animate()
 {
     requestAnimationFrame(animate);
