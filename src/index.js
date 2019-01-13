@@ -16,6 +16,9 @@ Math.degrees = function(radians) {
 class PartialCube extends THREE.Group {
     constructor(position, sides)
     {
+        var defaultTex = new THREE.TextureLoader().load('src/textures/default.png');
+        defaultTex.name = "default";
+
         super();
         this.tiles = new Array();
         var geometry, material, mesh;
@@ -23,7 +26,7 @@ class PartialCube extends THREE.Group {
 
         if(sides.pos_y)
         {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateX(Math.radians(-90));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0.5, 0));
             this.tiles.push({mesh : mesh, side : '+y'});
@@ -31,7 +34,7 @@ class PartialCube extends THREE.Group {
         }
         if(sides.pos_x)
         {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateY(Math.radians(90));
             mesh.position.addVectors(position, new THREE.Vector3(0.5, 0, 0));
             this.tiles.push({mesh : mesh, side : '+x'});
@@ -39,14 +42,14 @@ class PartialCube extends THREE.Group {
         }
         if(sides.pos_z)
         {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0, 0.5));
             this.tiles.push({mesh : mesh, side : '+z'});
             this.add(mesh);        
         }
         if(sides.neg_y)
         {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateX(Math.radians(90));
             mesh.position.addVectors(position, new THREE.Vector3(0, -0.5, 0));
             this.tiles.push({mesh : mesh, side : '-y'});
@@ -54,7 +57,7 @@ class PartialCube extends THREE.Group {
         }
         if(sides.neg_x)
         {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateY(Math.radians(-90));
             mesh.position.addVectors(position, new THREE.Vector3(-0.5, 0, 0));
             this.tiles.push({mesh : mesh, side : '-x'});
@@ -62,7 +65,7 @@ class PartialCube extends THREE.Group {
         }
         if(sides.neg_z)
         {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff}));
+            mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateY(Math.radians(180));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0, -0.5));
             this.tiles.push({mesh : mesh, side : '-z'});
@@ -250,23 +253,31 @@ var debug = false;
 
 //Three variables
 var scene, camera, renderer, cameraControls;
+var Xtex, Otex;
 var RubiksCube;
 
 var raycaster = new THREE.Raycaster();
-var selection;
 
 var mouse = new THREE.Vector2();
+var selection = null;
+var mouseDown = false, mouseUp = true;
+
+var xTurn = true;
 
 function init()
 {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0);
+    scene.background = new THREE.Color(0xffffcc);
 
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 2000);
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight); //CHANGE RESOLUTION BASED ON WINDOW SIZE HERE
     document.body.appendChild(renderer.domElement);
+
+    let loader = new THREE.TextureLoader();
+    Xtex = loader.load('src/textures/X.png');
+    Otex = loader.load('src/textures/O.png');
 
     initControls();
     camera.position.set( 0, 0, 5 );
@@ -277,6 +288,7 @@ function init()
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener( 'mousemove', onMouseMove, false );
     window.addEventListener( 'mouseup', onMouseUp, false)
+    window.addEventListener('mousedown', onMouseDown, false);
 }
 
 
@@ -303,6 +315,9 @@ function animate()
 
 function onMouseMove( event ) {
 
+    if(mouseDown && !selection)
+        return;
+
 	// calculate mouse position in normalized device coordinates
 	// (-1 to +1) for both components
 
@@ -327,11 +342,26 @@ function onMouseMove( event ) {
 
 function onMouseUp()
 {
-    if(selection)
+    mouseUp = true;
+    mouseDown = false;
+
+    //A tile has been selected for placement
+    if(selection && selection.material.map.name == "default")
     {
-        selection.material.color.set(0xff0000);
+        if(xTurn = !xTurn)
+            selection.material.map = Otex;
+        else
+            selection.material.map = Xtex;
+        
+        selection.material.needsUpdate = true;
         console.log(selection);
     }
+}
+
+function onMouseDown()
+{
+    mouseDown = true;
+    mouseUp = false;
 }
 
 function onWindowResize()
