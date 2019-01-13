@@ -279,25 +279,25 @@ function init()
     defaultTex  = loader.load('src/textures/default.png', onLoad);
     defaultTex.name = "default";
 
+    initControls();
+    camera.position.set( 0, 0, 5 );
+
     //Waits for all textures to load
     function onLoad()
     {
         if(++texLoadCount != 3)
             return;
-            
+
         RubiksCube = new Rubiks();
         scene.add(RubiksCube);
 
+        window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'mouseup', onMouseUp, false)
+        window.addEventListener('mousedown', onMouseDown, false);
+
         animate();
     }
-
-    initControls();
-    camera.position.set( 0, 0, 5 );
-
-    window.addEventListener('resize', onWindowResize, false);
-    window.addEventListener( 'mousemove', onMouseMove, false );
-    window.addEventListener( 'mouseup', onMouseUp, false)
-    window.addEventListener('mousedown', onMouseDown, false);
 }
 
 
