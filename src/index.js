@@ -17,7 +17,11 @@ class PartialCube extends THREE.Group {
     constructor(position, sides)
     {
         super();
-        this.tiles = new Array();
+
+        let box = new THREE.Mesh(new THREE.BoxGeometry(0.99, 0.99, 0.99), new THREE.MeshBasicMaterial({color : 0x000000}))
+        box.position.copy(position);
+        this.add(box);
+
         var geometry, material, mesh;
         geometry = new THREE.PlaneGeometry(1,1);
 
@@ -26,7 +30,7 @@ class PartialCube extends THREE.Group {
             mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateX(Math.radians(-90));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0.5, 0));
-            this.tiles.push({mesh : mesh, side : '+y'});
+            mesh.name = "+y";
             this.add(mesh);
         }
         if(sides.pos_x)
@@ -34,14 +38,14 @@ class PartialCube extends THREE.Group {
             mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateY(Math.radians(90));
             mesh.position.addVectors(position, new THREE.Vector3(0.5, 0, 0));
-            this.tiles.push({mesh : mesh, side : '+x'});
+            mesh.name = "+x";
             this.add(mesh);        
         }
         if(sides.pos_z)
         {
             mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0, 0.5));
-            this.tiles.push({mesh : mesh, side : '+z'});
+            mesh.name = "+z";
             this.add(mesh);        
         }
         if(sides.neg_y)
@@ -49,7 +53,7 @@ class PartialCube extends THREE.Group {
             mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateX(Math.radians(90));
             mesh.position.addVectors(position, new THREE.Vector3(0, -0.5, 0));
-            this.tiles.push({mesh : mesh, side : '-y'});
+            mesh.name = "-y";
             this.add(mesh);        
         }
         if(sides.neg_x)
@@ -57,7 +61,7 @@ class PartialCube extends THREE.Group {
             mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateY(Math.radians(-90));
             mesh.position.addVectors(position, new THREE.Vector3(-0.5, 0, 0));
-            this.tiles.push({mesh : mesh, side : '-x'});
+            mesh.name = "-x";
             this.add(mesh);        
         }
         if(sides.neg_z)
@@ -65,7 +69,7 @@ class PartialCube extends THREE.Group {
             mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color : 0xffffff, map : defaultTex}));
             mesh.rotateY(Math.radians(180));
             mesh.position.addVectors(position, new THREE.Vector3(0, 0, -0.5));
-            this.tiles.push({mesh : mesh, side : '-z'});
+            mesh.name = "-z";
             this.add(mesh);        
         }
     }
@@ -257,7 +261,7 @@ var raycaster = new THREE.Raycaster();
 
 var mouse = new THREE.Vector2();
 var selection = null;
-var mouseDown = false, mouseUp = true;
+var mouseLeftDown = false, mouseLeftUp = true;
 
 var xTurn = true;
 
@@ -273,7 +277,7 @@ function init()
     document.body.appendChild(renderer.domElement);
 
     let loader = new THREE.TextureLoader();
-    var texLoadCount = 0;
+    let texLoadCount = 0;
     Xtex        = loader.load('src/textures/X.png', onLoad);
     Otex        = loader.load('src/textures/O.png', onLoad);
     defaultTex  = loader.load('src/textures/Default.png', onLoad);
@@ -317,13 +321,12 @@ function animate()
 {
     requestAnimationFrame(animate);
     cameraControls.update();
-    RubiksCube.rotateMiddleAboutY(Math.radians(1));
     renderer.render(scene, camera);
 }
 
 function onMouseMove( event ) {
 
-    if(mouseDown && !selection)
+    if(mouseLeftDown && !selection)
         return;
 
 	// calculate mouse position in normalized device coordinates
@@ -348,28 +351,109 @@ function onMouseMove( event ) {
 
 }
 
-function onMouseUp()
+function onMouseUp(event)
 {
-    mouseUp = true;
-    mouseDown = false;
-
-    //A tile has been selected for placement
-    if(selection && selection.material.map.name == "default")
+    if(event.which == 1)
     {
-        if(xTurn = !xTurn)
-            selection.material.map = Otex;
-        else
-            selection.material.map = Xtex;
-        
-        selection.material.needsUpdate = true;
-        console.log(selection);
+        mouseLeftUp = true;
+        mouseLeftDown = false;
+
+        //A tile has been selected for placement
+        if(selection && selection.material.map.name == "default")
+        {
+            if(xTurn = !xTurn)
+                selection.material.map = Otex;
+            else
+                selection.material.map = Xtex;
+            
+            selection.material.needsUpdate = true;
+            console.log(selection);
+        }
     }
+    if(event.which == 3)
+        console.log(selection);
 }
 
-function onMouseDown()
+function onMouseDown(event)
 {
-    mouseDown = true;
-    mouseUp = false;
+    if(event.which == 1) //Left click
+    {
+        mouseLeftDown = true;
+        mouseLeftUp = false;
+    }
+    else if(event.which == 3 && selection) //Right click
+    {
+        var pos_x = false, pos_y = false, pos_z = false, neg_x = false, neg_y = false, neg_z = false;
+        selection.parent.children.forEach(function(child)
+        {
+            console.log(child.name);
+            switch(child.name)
+            {
+                case "+x":
+                    pos_x = true;
+                    break;
+                case "+y":
+                    pos_y = true;
+                    break;
+                case "+z":
+                    pos_z = true;
+                    break;
+                case "-x":
+                    neg_x = true;
+                    break;
+                case "-y":
+                    neg_y = true;
+                    break;
+                case "-z":
+                    neg_z = true;
+                    break;
+            }
+        });
+
+        var name = selection.name;
+        if(name == "+z" || name == "-z") //Selected Z face
+        {
+            //Check relatives for proper sectional rotation
+            if(neg_x && pos_y) //Top Left
+            {
+                 // rotateLeft or rotateTop
+            }
+            else if(neg_x && neg_y) //Bottom Left
+            {
+                // rotateLeft or rotateBottom
+            }
+            else if(neg_x) //Center Left
+            {
+                // rotateLeft or rotateMiddleAboutY
+            }
+            else if(pos_x & pos_y) //Top Right
+            {
+                // rotateRight or rotateTop
+            }
+            else if(pos_x && neg_y) //Bottom Right
+            {
+                // rotateRight or rotateBottom
+            }
+            else if(pos_x) //Center Right
+            {
+                // rotateRight or rotateMiddleAboutY
+            }
+            else if(pos_y) //Middle Top
+            {
+                // rotateMiddleAboutX or rotateTop
+            }
+            else if(neg_y) //Middle Bottom
+            {
+                // rotateMiddleAboutX or rotateBottom
+            }
+            else //Center
+            {
+                // rotateMiddleAboutX or rotateMiddleAboutY
+            }
+        }
+
+        //console.log("pos_x: " + pos_x + ", pos_y: " + pos_y + ", pos_z: " + pos_z + ", neg_x: " + neg_x + ", neg_y: " + neg_y + ", neg_z: " + neg_z);
+    }
 }
 
 function onWindowResize()
