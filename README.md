@@ -1,2 +1,2 @@
-# Tic-Tac-Rubix
-Tic Tac Toe played on a Rubix Cube.
+# Tic-Tac-Rubiks
+Tic Tac Toe played on a Rubiks Cube.
